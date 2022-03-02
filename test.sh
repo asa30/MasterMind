@@ -28,8 +28,8 @@ n=0
 cmd="./${cw} -u 123 321"
 out="`$cmd`"
 exp=$(cat <<EOS
-1 exact matches
-2 approximate matches
+1 exact
+2 approximate
 EOS
 )
 check
@@ -37,8 +37,8 @@ check
 cmd="./${cw} -u 121 313"
 out="`$cmd`"
 exp=$(cat <<EOS
-0 exact matches
-1 approximate matches
+0 exact
+1 approximate
 EOS
 )
 check
@@ -46,8 +46,8 @@ check
 cmd="./${cw} -u 132 321"
 out="`$cmd`"
 exp=$(cat <<EOS
-0 exact matches
-3 approximate matches
+0 exact
+3 approximate
 EOS
 )
 check
@@ -55,8 +55,8 @@ check
 cmd="./${cw} -u 123 112"
 out="`$cmd`"
 exp=$(cat <<EOS
-1 exact matches
-1 approximate matches
+1 exact
+1 approximate
 EOS
 )
 check
@@ -64,8 +64,8 @@ check
 cmd="./${cw} -u 112 233"
 out="`$cmd`"
 exp=$(cat <<EOS
-0 exact matches
-1 approximate matches
+0 exact
+1 approximate
 EOS
 )
 check
@@ -73,8 +73,8 @@ check
 cmd="./${cw} -u 111 333"
 out="`$cmd`"
 exp=$(cat <<EOS
-0 exact matches
-0 approximate matches
+0 exact
+0 approximate
 EOS
 )
 check
@@ -82,8 +82,8 @@ check
 cmd="./${cw} -u 331 223"
 out="`$cmd`"
 exp=$(cat <<EOS
-0 exact matches
-1 approximate matches
+0 exact
+1 approximate
 EOS
 )
 check
@@ -91,8 +91,8 @@ check
 cmd="./${cw} -u 331 232"
 out="`$cmd`"
 exp=$(cat <<EOS
-1 exact matches
-0 approximate matches
+1 exact
+0 approximate
 EOS
 )
 check
@@ -100,8 +100,8 @@ check
 cmd="./${cw} -u 232 331"
 out="`$cmd`"
 exp=$(cat <<EOS
-1 exact matches
-0 approximate matches
+1 exact
+0 approximate
 EOS
 )
 check
@@ -109,8 +109,8 @@ check
 cmd="./${cw} -u 312 312"
 out="`$cmd`"
 exp=$(cat <<EOS
-3 exact matches
-0 approximate matches
+3 exact
+0 approximate
 EOS
 )
 check
