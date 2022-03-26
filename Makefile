@@ -8,7 +8,6 @@ tester=testm
 CC=gcc
 AS=as
 OPTS=-W 
-OPTS=-std=c99
 
 all: $(prg) cw2 $(tester)
 
