@@ -7,7 +7,7 @@ tester=testm
 
 CC=gcc
 AS=as
-OPTS=-W -std=gnu99
+OPTS=-W -std=c99
 
 all: $(prg) cw2 $(tester)
 
