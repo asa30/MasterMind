@@ -4,6 +4,6 @@ stages:
 test:
   stage: Test
   script:
-  - make all
+  - make test
   - sh ./test.sh
 
