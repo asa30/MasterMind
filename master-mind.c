@@ -151,24 +151,26 @@ void waitForButton (uint32_t *gpio, int button);
 
 /* send a @value@ (LOW or HIGH) on pin number @pin@; @gpio@ is the mmaped GPIO base address */
 void digitalWrite (volatile uint32_t *gpio, int pin, int value){
+  //offset variable
   int off;
-  int res;
-  
+  //get offset
   if(value == HIGH){
     off = 7;
   } 
   else{
     off = 10;
   } 
-
+  // assign to memory address
   *(gpio + off) = 1 << (pin & 31);
 }
 
 /* set the @mode@ of a GPIO @pin@ to INPUT or OUTPUT; @gpio@ is the mmaped GPIO base address */
 void pinMode(volatile uint32_t *gpio, int pin, int mode){
+  //get shift
   int shift =3 * (pin % 10);
+  //get fsel register
   int fsel = pin/10;
-
+  //if statement depends on mode 1 = output , 0 = input
   if(mode == 1) *(gpio + fsel) = (*(gpio + fsel) & ~(7 << shift)) | (1 << shift);
   else *(gpio + fsel) = *(gpio + fsel) & ~(7 << shift);
 }
@@ -176,20 +178,20 @@ void pinMode(volatile uint32_t *gpio, int pin, int mode){
 /* send a @value@ (LOW or HIGH) on pin number @pin@; @gpio@ is the mmaped GPIO base address */
 /* can use digitalWrite(), depending on your implementation */
 void writeLED(uint32_t *gpio, int led, int value){
+  //just uses digital write
   digitalWrite(gpio, led, value);
 }
 
 /* read a @value@ (LOW or HIGH) from pin number @pin@ (a button device); @gpio@ is the mmaped GPIO base address */
 int readButton(volatile uint32_t *gpio, int button){
+  //read the memory address and return
   return (*(gpio + 13) & (1 << (button & 31)));
 }
 
 /* wait for a button input on pin number @button@; @gpio@ is the mmaped GPIO base address */
 /* can use readButton(), depending on your implementation */
 void waitForButton (uint32_t *gpio, int button){
-  // while (1){
-  //   if (readButton(gpio, button) != 0 ) break; 
-  // }
+  // waits for value to not be zero
   while( (*(gpio + 13) & (1 << (button & 31))) == 0);
 }
 
@@ -207,15 +209,19 @@ void waitForButton (uint32_t *gpio, int button){
 void initSeq() {
   /* ***  COMPLETE the code here  ***  */
   srand(time(NULL));
+  //initialise tempseq
   int tempseq = 0;
+  //get random sequence
   for(int i = 0; i < 3; i++){
     tempseq *= 10;
     tempseq += rand() % 3 + 1;
   }
+  //allocate meory and assign
   theSeq = (int*)malloc(seqlen*sizeof(int));
   *theSeq = tempseq;
 }
 
+// helper method for characters
 char * getLetter(int num){
   switch(num){
     case 1:
@@ -288,12 +294,15 @@ int /* or int* */ countMatches(int *seq1, int *seq2) {
   //getting matches
   for (int i = 0; i < seqlen; i++){
     if (aseq1[i] == aseq2[i])
-      exact++;
+      exact++;//increment exact
     else if (aseq1[i] != aseq2[i]){
       for (int j = 0; j < seqlen; j++){
+        // indexes j and i must not be the same 
+        // char at index j of seq1 must be equal to chat at index i of second sequence 
+        // index j must not be an exact match
         if (j != i && aseq1[j] == aseq2[i] && aseq1[j] != aseq2[j]){
-          approx++;
-          break;
+          approx++;//increment approximate
+          break;//break there can only be one approximate
         }
       }
     }
@@ -309,25 +318,24 @@ int /* or int* */ countMatches(int *seq1, int *seq2) {
 /* show the results from calling countMatches on seq1 and seq1 */
 void showMatches(int /* or int* */ code, /* only for debugging */ int *seq1, int *seq2, /* optional, to control layout */ int lcd_format) {
   /* ***  COMPLETE the code here  ***  */
-  int exact = code/10;
-  int approx = code - exact*10;
-  printf("%d exact\n", exact);
-  printf("%d approximate\n", approx);
+  int exact = code/10;//separate exact 
+  int approx = code - exact*10;// get approximate
+  printf("%d exact\n", exact);//print exact
+  printf("%d approximate\n", approx);//print approximate
 }
 
 /* parse an integer value as a list of digits, and put them into @seq@ */
 /* needed for processing command-line with options -s or -u            */
 void readSeq(int *seq, int val) {
   /* ***  COMPLETE the code here  ***  */
-  *seq = val;
-  //printf("(readSeq)value of seq is %d\n", *seq);
+  *seq = val;//simply assign val to seq
 }
 
 /* read a guess sequence fron stdin and store the values in arr */
 /* only needed for testing the game logic, without button input */
 int readNum(int max) {
   /* ***  COMPLETE the code here  ***  */
-  printf("(readNum) value read: %d", max);
+  //didnt use it so idk
   return max;
 }
 
@@ -463,6 +471,7 @@ void delayMicroseconds (unsigned int howLong)
 /* blink the led on pin @led@, @c@ times */
 void blinkN(uint32_t *gpio, int led, int c) { 
   /* ***  COMPLETE the code here  ***  */
+  //for loop writes high then low with delays
     for(int i = 0; i < c ; i++){
     writeLED(gpio,led,HIGH);
     delay(DELAY);
@@ -645,9 +654,11 @@ int main (int argc, char *argv[])
   while (!found) {
     attempts++;
     *attSeq = 0;
+
     //the red control LED should blink three times to indicate the start of a new round.
     blinkN(gpio,LED2,3);
     delay(DELAY);
+
     /* ******************************************************* */
     /* ***  COMPLETE the code here  ***                        */
     /* this needs to implement the main loop of the game:      */
@@ -657,36 +668,41 @@ int main (int argc, char *argv[])
     /* show the result                                         */
     /* see CW spec for details                                 */
     /* ******************************************************* */
+    //command terminal helper 
     printf(" Enter your guess (attempt:%d)\n\n",attempts);
 
+    //for loop for 3 inputs
     for(int i = 0; i<seqlen; i++){
-      printf("  color number %d\n",i+1);
+      printf("  color number %d\n",i+1);//terminal helper
       *attSeq *= 10;
-      int acc = 0;
-      int press;
-      int theVal;
-      int currentVal = HIGH;
+      int acc = 0;//acumulator
+      int press;//variable for readButton
+      int currentVal = HIGH;// a little helper to deal with button holding time (human slowness)
+      //timer to count timeout
       clock_t timer = clock();
 
+      //maximum of 3 presses 
       while(acc<seqlen){
 
         press = readButton(gpio,Button);
-
+        //if button pressed
         if(press!=0 && currentVal == HIGH){
           currentVal = LOW;
           acc++;
           timer = clock();
           printf("   Button Pressed\n");
         }
+        //if not pressed
         else if(press == 0 && currentVal == LOW){
           currentVal = HIGH;
         }
-
+        //if timed out 
         if(clock() > timer+TIMEOUT) break;
       }
 
-      printf("  color number %d is %d\n\n",i+1,acc);
-      *attSeq += acc;
+      printf("  color number %d is %d\n\n",i+1,acc);//terminal helper
+      *attSeq += acc;//add to attempt sequence
+      //blink acknowledgements 
       blinkN(gpio, RLED, 1);
       blinkN(gpio, GLED, acc);
 
@@ -694,11 +710,13 @@ int main (int argc, char *argv[])
 
     delay(DELAY);
 
-    printf(" end of guess  \n your guess is %d\n", *attSeq);
+    printf(" end of guess  \n your guess is %d\n", *attSeq);//terminal helper
+    //blink end of guess
     blinkN(gpio, RLED, 2);
 
     delay(DELAY);
 
+    //get matches
     res_matches = countMatches(theSeq, attSeq);
     showMatches(res_matches,attSeq,theSeq,1);
     exact = res_matches/10;
@@ -713,7 +731,10 @@ int main (int argc, char *argv[])
 
     delay(DELAY);
 
+    //check exact matches 
     if(exact == 3) found = 1;
+    //check attempts
+    if(attempts==9) break;
   }
   if (found) {
     /* ***  COMPLETE the code here  ***  */

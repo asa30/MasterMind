@@ -1,9 +1,9 @@
 /* ***************************************************************************** */
 /* You can use this file to define the low-level hardware control fcts for       */
-/* LED, button and LCD devices.                                                  */ 
+/* LED, button and LCD devices.                                                  */
 /* Note that these need to be implemented in Assembler.                          */
 /* You can use inline Assembler code, or use a stand-alone Assembler file.       */
-/* Alternatively, you can implement all fcts directly in master-mind.c,          */  
+/* Alternatively, you can implement all fcts directly in master-mind.c,          */
 /* using inline Assembler code there.                                            */
 /* The Makefile assumes you define the functions here.                           */
 /* ***************************************************************************** */
@@ -53,23 +53,42 @@ int failure (int fatal, const char *message, ...);
 // Functions to implement here (or directly in master-mind.c)
 
 /* this version needs gpio as argument, because it is in a separate file */
-void digitalWrite (uint32_t *gpio, int pin, int value) {
-  /* ***  COMPLETE the code here, using inline Assembler  ***  */
+void digitalWrite (volatile uint32_t *gpio, int pin, int value){
+  //offset variable
+  int off;
+  //get offset
+  if(value == HIGH){
+    off = 7;
+  } 
+  else{
+    off = 10;
+  } 
+  // assign to memory address
+  *(gpio + off) = 1 << (pin & 31);
 }
 
 // adapted from setPinMode
-void pinMode(uint32_t *gpio, int pin, int mode /*, int fSel, int shift */) {
-  /* ***  COMPLETE the code here, using inline Assembler  ***  */
+void pinMode(volatile uint32_t *gpio, int pin, int mode){
+  //get shift
+  int shift =3 * (pin % 10);
+  //get fsel register
+  int fsel = pin/10;
+  //if statement depends on mode 1 = output , 0 = input
+  if(mode == 1) *(gpio + fsel) = (*(gpio + fsel) & ~(7 << shift)) | (1 << shift);
+  else *(gpio + fsel) = *(gpio + fsel) & ~(7 << shift);
 }
 
-void writeLED(uint32_t *gpio, int led, int value) {
-  /* ***  COMPLETE the code here, using inline Assembler  ***  */
+void writeLED(uint32_t *gpio, int led, int value){
+  //just uses digital write
+  digitalWrite(gpio, led, value);
 }
 
-int readButton(uint32_t *gpio, int button) {
-  /* ***  COMPLETE the code here, using inline Assembler  ***  */
+int readButton(volatile uint32_t *gpio, int button){
+  //read the memory address and return
+  return (*(gpio + 13) & (1 << (button & 31)));
 }
 
-void waitForButton(uint32_t *gpio, int button) {
-  /* ***  COMPLETE the code here, just C no Assembler; you can use readButton ***  */
+void waitForButton (uint32_t *gpio, int button){
+  // waits for value to not be zero
+  while( (*(gpio + 13) & (1 << (button & 31))) == 0);
 }
